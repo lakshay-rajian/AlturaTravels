@@ -12,7 +12,7 @@ const packages = [
     location: "Kumaon region, 285 km from Delhi",
     duration: "2–3 days",
     price: 6999,
-    image: "",
+    image: "/uploads/1763920550580-29854599.jpg",
   },
   {
     name: "Mussoorie",
@@ -21,7 +21,7 @@ const packages = [
     location: "Near Dehradun (35 km)",
     duration: "2–3 days",
     price: 7499,
-    image: "",
+    image: "/uploads/1763920557297-698632507.jpg",
   },
   {
     name: "Rishikesh",
@@ -30,7 +30,7 @@ const packages = [
     location: "Dehradun district, near Haridwar",
     duration: "2–3 days",
     price: 5499,
-    image: "",
+    image: "/uploads/1763920558211-736420159.jpg",
   },
   {
     name: "Haridwar",
@@ -39,7 +39,7 @@ const packages = [
     location: "Foothills of the Shivalik range",
     duration: "1–2 days",
     price: 4999,
-    image: "",
+    image: "/uploads/1763920558386-465271291.jpg",
   },
   {
     name: "Auli",
@@ -48,7 +48,7 @@ const packages = [
     location: "Chamoli district",
     duration: "3–4 days",
     price: 12999,
-    image: "",
+    image: "/uploads/1763920558574-108138181.jpg",
   },
   {
     name: "Jim Corbett National Park",
@@ -57,7 +57,7 @@ const packages = [
     location: "Ramnagar, Nainital district",
     duration: "2–3 days",
     price: 7999,
-    image: "",
+    image: "/uploads/1763920558770-847558582.jpg",
   },
   {
     name: "Chopta",
@@ -66,7 +66,7 @@ const packages = [
     location: "Rudraprayag district",
     duration: "2–3 days",
     price: 8499,
-    image: "",
+    image: "/uploads/1763920558988-179095141.jpg",
   },
   {
     name: "Valley of Flowers",
@@ -75,7 +75,7 @@ const packages = [
     location: "Chamoli district",
     duration: "3–4 days",
     price: 11999,
-    image: "",
+    image: "/uploads/1763920582646-602006845.jpg",
   },
   {
     name: "Badrinath",
@@ -84,7 +84,7 @@ const packages = [
     location: "Chamoli district",
     duration: "2–3 days",
     price: 8999,
-    image: "",
+    image: "/uploads/1763920583062-996285353.jpg",
   },
   {
     name: "Lansdowne",
@@ -93,7 +93,7 @@ const packages = [
     location: "Pauri Garhwal district",
     duration: "2 days",
     price: 6499,
-    image: "",
+    image: "/uploads/1763920583248-734870654.jpg",
   },
 ];
 

@@ -19,7 +19,7 @@ export default function Enquiry() {
     e.preventDefault();
     setStatus("");
     try {
-      await axios.post("http://localhost:5000/api/enquiries", form);
+      await axios.post(`${import.meta.env.VITE_API_URL}/enquiries`, form);
       setStatus("Thanks! We have received your enquiry.");
       setForm({ name: "", email: "", phone: "", message: "" });
     } catch (err) {

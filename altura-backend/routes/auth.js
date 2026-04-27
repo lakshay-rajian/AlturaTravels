@@ -2,8 +2,41 @@ import express from "express";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import authMiddleware from "../middleware/auth.js";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 const router = express.Router();
+
+// GET PROFILE
+router.get("/profile", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// UPDATE PROFILE
+router.put("/profile", authMiddleware, async (req, res) => {
+  const { name, password } = req.body;
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (name) user.name = name;
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+    await user.save();
+    res.json({ message: "Profile updated successfully", user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // helper: parse allowed admin emails
 function getAllowedAdminEmails() {
@@ -86,7 +119,7 @@ router.post("/forgot-password", async (req, res) => {
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
     });
 
-    const resetURL = `http://localhost:5173/reset-password/${token}`;
+    const resetURL = `${process.env.CLIENT_URL || "http://localhost:5173"}/reset-password/${token}`;
 
     await transporter.sendMail({
       to: user.email,

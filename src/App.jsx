@@ -9,6 +9,8 @@ import Enquiry from "./pages/Enquiry";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Booking from "./pages/Booking";
+import MyBookings from "./pages/MyBookings";
+import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import PackageDetails from "./pages/PackageDetails";
 import AdminLogin from "./pages/AdminLogin";
@@ -19,6 +21,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import Sitemap from "./pages/Sitemap";
 
 export default function App() {
   return (
@@ -33,12 +38,31 @@ export default function App() {
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/blogs/:id" element={<BlogDetails />} />
           <Route path="/enquiry" element={<Enquiry />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/sitemap" element={<Sitemap />} />
 
           <Route
             path="/bookings"
             element={
               <ProtectedRoute>
                 <Booking />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-bookings"
+            element={
+              <ProtectedRoute>
+                <MyBookings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

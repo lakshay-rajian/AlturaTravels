@@ -18,7 +18,7 @@ export default function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
   const totalBookings = bookings.length;
   const confirmedBookings = bookings.filter(
-    (b) => b.status === "confirmed"
+    (b) => b.status === "confirmed",
   ).length;
   const pendingBookings = bookings.filter((b) => b.status === "pending").length;
   const [loading, setLoading] = useState(false);
@@ -54,9 +54,12 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       setError("");
-      const res = await axios.get("http://localhost:5000/api/bookings/admin", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/bookings/admin`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setBookings(res.data);
     } catch (err) {
       setError("Failed to load bookings");
@@ -68,12 +71,12 @@ export default function AdminDashboard() {
   const updateStatus = async (id, status) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/bookings/${id}/status`,
+        `${import.meta.env.VITE_API_URL}/bookings/${id}/status`,
         { status },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setBookings((prev) =>
-        prev.map((b) => (b._id === id ? { ...b, status } : b))
+        prev.map((b) => (b._id === id ? { ...b, status } : b)),
       );
     } catch (err) {
       // no-op
@@ -81,7 +84,7 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (activeTab === "bookings") {
+    if (activeTab === "overview" || activeTab === "bookings") {
       fetchBookings();
       const id = setInterval(fetchBookings, 5000);
       return () => clearInterval(id);
@@ -97,9 +100,16 @@ export default function AdminDashboard() {
   // -------- Packages CRUD --------
   const fetchPackagesAdmin = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/packages");
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/packages`);
       setPackages(res.data);
-    } catch (_) {}
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to save package. Please ensure you are logged in as admin.";
+      setError(msg);
+      console.error("Package save failed:", msg);
+    }
   };
 
   const submitPackage = async (e) => {
@@ -110,26 +120,29 @@ export default function AdminDashboard() {
         const fd = new FormData();
         fd.append("image", pkgImageFile);
         const up = await axios.post(
-          "http://localhost:5000/api/uploads/image",
+          `${import.meta.env.VITE_API_URL}/uploads/image`,
           fd,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
-        imageUrl = up.data.url;
+        imageUrl = `${import.meta.env.VITE_IMAGE_URL}${up.data.url}`;
+      }
+      if (imageUrl?.startsWith("/uploads/")) {
+        imageUrl = `${import.meta.env.VITE_IMAGE_URL}${imageUrl}`;
       }
       if (pkgEditingId) {
         const res = await axios.put(
-          `http://localhost:5000/api/packages/${pkgEditingId}`,
+          `${import.meta.env.VITE_API_URL}/packages/${pkgEditingId}`,
           { ...pkgForm, image: imageUrl, price: Number(pkgForm.price) },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         setPackages((prev) =>
-          prev.map((p) => (p._id === pkgEditingId ? res.data : p))
+          prev.map((p) => (p._id === pkgEditingId ? res.data : p)),
         );
       } else {
         const res = await axios.post(
-          "http://localhost:5000/api/packages",
+          `${import.meta.env.VITE_API_URL}/packages`,
           { ...pkgForm, image: imageUrl, price: Number(pkgForm.price) },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         setPackages((prev) => [res.data, ...prev]);
       }
@@ -143,6 +156,7 @@ export default function AdminDashboard() {
       });
       setPkgImageFile(null);
       setPkgEditingId(null);
+      setError("");
     } catch (_) {}
   };
 
@@ -160,7 +174,7 @@ export default function AdminDashboard() {
 
   const deletePackage = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/packages/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/packages/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPackages((prev) => prev.filter((p) => p._id !== id));
@@ -176,7 +190,7 @@ export default function AdminDashboard() {
   // -------- Blogs CRUD --------
   const fetchBlogsAdmin = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/blogs");
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/blogs`);
       setBlogs(res.data);
     } catch (_) {}
   };
@@ -186,18 +200,18 @@ export default function AdminDashboard() {
     try {
       if (blogEditingId) {
         const res = await axios.put(
-          `http://localhost:5000/api/blogs/${blogEditingId}`,
+          `${import.meta.env.VITE_API_URL}/blogs/${blogEditingId}`,
           blogForm,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         setBlogs((prev) =>
-          prev.map((b) => (b._id === blogEditingId ? res.data : b))
+          prev.map((b) => (b._id === blogEditingId ? res.data : b)),
         );
       } else {
         const res = await axios.post(
-          "http://localhost:5000/api/blogs",
+          `${import.meta.env.VITE_API_URL}/blogs`,
           blogForm,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         setBlogs((prev) => [res.data, ...prev]);
       }
@@ -218,7 +232,7 @@ export default function AdminDashboard() {
 
   const deleteBlog = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/blogs/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/blogs/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBlogs((prev) => prev.filter((b) => b._id !== id));
@@ -234,9 +248,12 @@ export default function AdminDashboard() {
   // -------- Enquiries --------
   const fetchEnquiries = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/enquiries/admin", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/enquiries/admin`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setEnquiries(res.data);
     } catch (_) {}
   };
@@ -244,14 +261,14 @@ export default function AdminDashboard() {
   const resolveEnquiry = async (id) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/enquiries/${id}/resolve`,
+        `${import.meta.env.VITE_API_URL}/enquiries/${id}/resolve`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       setEnquiries((prev) =>
-        prev.map((e) => (e._id === id ? { ...e, status: "resolved" } : e))
+        prev.map((e) => (e._id === id ? { ...e, status: "resolved" } : e)),
       );
     } catch (_) {}
   };
@@ -441,7 +458,7 @@ export default function AdminDashboard() {
                         .map((r) =>
                           r
                             .map((v) => `"${String(v).replaceAll('"', '""')}"`)
-                            .join(",")
+                            .join(","),
                         )
                         .join("\n");
                       const blob = new Blob([csv], {
@@ -562,6 +579,12 @@ export default function AdminDashboard() {
                 )}
               </div>
             </form>
+
+            {error && (
+              <p className="mt-3 text-red-600" role="alert">
+                {error}
+              </p>
+            )}
 
             {/* List */}
             <div className="mt-6 grid gap-4 md:grid-cols-2">

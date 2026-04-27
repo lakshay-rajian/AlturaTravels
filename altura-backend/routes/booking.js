@@ -50,28 +50,63 @@ router.post("/", authMiddleware, async (req, res) => {
 
     // Send confirmation email
     try {
-      const transporter = nodemailer.createTransport({
-        service: "Gmail",
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-      });
+      let transporter;
+      
+      if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        // Use real credentials if provided
+        transporter = nodemailer.createTransport({
+          service: "Gmail",
+          auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+        });
+      } else {
+        // Use Ethereal for testing if no credentials are set
+        const testAccount = await nodemailer.createTestAccount();
+        transporter = nodemailer.createTransport({
+          host: "smtp.ethereal.email",
+          port: 587,
+          secure: false,
+          auth: { user: testAccount.user, pass: testAccount.pass },
+        });
+        console.log("Using Ethereal for testing booking email...");
+      }
 
-      await transporter.sendMail({
+      const info = await transporter.sendMail({
         to: user.email,
-        from: process.env.EMAIL_USER,
+        from: process.env.EMAIL_USER || "no-reply@alturatravels.com",
         subject: "Your Booking Confirmation - Altura Travels",
         html: `
-          <h2>Hi ${user.name},</h2>
-          <p>Thank you for booking with Altura Travels.</p>
-          <p><strong>Package:</strong> ${selectedPackage.name}</p>
-          <p><strong>Date:</strong> ${new Date(date).toDateString()}</p>
-          <p><strong>Travelers:</strong> ${travelers}</p>
-          <p>Status: Pending confirmation</p>
-          <p>We will contact you soon with further details.</p>
-          <p>— Altura Travels</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
+            <div style="background-color: #2E4D38; color: white; padding: 20px; text-align: center;">
+              <h1 style="margin: 0;">Altura Travels</h1>
+            </div>
+            <div style="padding: 20px;">
+              <h2 style="color: #2E4D38;">Hi ${user.name},</h2>
+              <p>Thank you for choosing Altura Travels! Your booking request has been received and is currently being processed.</p>
+              
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Booking Details</h3>
+                <p><strong>Package:</strong> ${selectedPackage.name}</p>
+                <p><strong>Location:</strong> ${selectedPackage.location}</p>
+                <p><strong>Date:</strong> ${new Date(date).toDateString()}</p>
+                <p><strong>Travelers:</strong> ${travelers}</p>
+                <p><strong>Total Price:</strong> ₹${selectedPackage.price * travelers}</p>
+                <p><strong>Status:</strong> <span style="color: #f39c12; font-weight: bold;">Pending Confirmation</span></p>
+              </div>
+              
+              <p>Our travel experts will contact you shortly with the next steps and payment details.</p>
+              <p>If you have any questions, feel free to reply to this email or contact us on WhatsApp.</p>
+            </div>
+            <div style="background-color: #f1f1f1; color: #777; padding: 10px; text-align: center; font-size: 12px;">
+              <p>© 2026 Altura Travels. All rights reserved.</p>
+            </div>
+          </div>
         `,
       });
+
+      if (!process.env.EMAIL_USER) {
+        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+      }
     } catch (emailErr) {
-      // Do not fail booking creation if email fails
       console.error("Email send failed:", emailErr.message);
     }
 

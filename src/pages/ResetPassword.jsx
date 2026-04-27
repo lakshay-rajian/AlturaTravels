@@ -25,11 +25,14 @@ export default function ResetPassword() {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/reset-password/${token}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: form.password }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/reset-password/${token}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: form.password }),
+        },
+      );
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
@@ -64,7 +67,9 @@ export default function ResetPassword() {
         </div>
 
         <div>
-          <label className="block text-left text-gray-700">Confirm Password</label>
+          <label className="block text-left text-gray-700">
+            Confirm Password
+          </label>
           <input
             type="password"
             name="confirmPassword"

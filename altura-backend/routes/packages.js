@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
 });
 
 // GET one package
-router.get(":id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const pkg = await Package.findById(req.params.id);
     if (!pkg) return res.status(404).json({ message: "Package not found" });
@@ -39,7 +39,7 @@ router.post("/", authMiddleware, adminOnly, async (req, res) => {
 });
 
 // Admin-only update package
-router.put(":id", authMiddleware, adminOnly, async (req, res) => {
+router.put("/:id", authMiddleware, adminOnly, async (req, res) => {
   try {
     const updated = await Package.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) return res.status(404).json({ message: "Package not found" });
@@ -50,7 +50,7 @@ router.put(":id", authMiddleware, adminOnly, async (req, res) => {
 });
 
 // Admin-only delete package
-router.delete(":id", authMiddleware, adminOnly, async (req, res) => {
+router.delete("/:id", authMiddleware, adminOnly, async (req, res) => {
   try {
     const deleted = await Package.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: "Package not found" });

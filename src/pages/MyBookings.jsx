@@ -11,7 +11,7 @@ export default function MyBookings() {
     const fetchBookings = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5000/api/bookings/my", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings/my`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -34,7 +34,7 @@ export default function MyBookings() {
   const cancelBooking = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/bookings/${id}/cancel`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${id}/cancel`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });

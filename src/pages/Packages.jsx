@@ -32,7 +32,7 @@ export default function Packages() {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/packages");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/packages`);
         setPackages(res.data);
       } catch (err) {
         console.error("Error fetching packages", err);
@@ -107,7 +107,7 @@ export default function Packages() {
               {/* Image */}
               {pkg.image && (
                 <img
-                  src={pkg.image}
+                  src={pkg.image.startsWith("/uploads/") ? `${import.meta.env.VITE_IMAGE_URL}${pkg.image}` : pkg.image}
                   alt={pkg.name}
                   className="w-full h-56 object-cover"
                   loading="lazy"

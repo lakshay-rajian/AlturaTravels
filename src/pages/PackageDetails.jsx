@@ -17,7 +17,7 @@ export default function PackageDetails() {
   useEffect(() => {
     const fetchPkg = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/packages/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/packages/${id}`);
         setPkg(res.data);
       } catch (e) {
         setError("Failed to load package");
@@ -28,7 +28,7 @@ export default function PackageDetails() {
     fetchPkg();
     const fetchReviews = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/reviews/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/reviews/${id}`);
         setReviews(res.data);
       } catch (_) {}
     };
@@ -40,7 +40,7 @@ export default function PackageDetails() {
     setMessage("");
     try {
       await axios.post(
-        "http://localhost:5000/api/bookings",
+        `${import.meta.env.VITE_API_URL}/bookings`,
         { packageId: id, travelers: Number(form.travelers), date: form.date },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -63,7 +63,7 @@ export default function PackageDetails() {
             <div className="bg-white rounded-2xl shadow border overflow-hidden">
               {pkg?.image && (
                 <img
-                  src={pkg.image}
+                  src={pkg.image.startsWith("/uploads/") ? `${import.meta.env.VITE_IMAGE_URL}${pkg.image}` : pkg.image}
                   alt={pkg.name}
                   className="w-full h-80 object-cover"
                   loading="lazy"
@@ -148,13 +148,13 @@ export default function PackageDetails() {
                 e.preventDefault();
                 try {
                   await axios.post(
-                    `http://localhost:5000/api/reviews/${id}`,
+                    `${import.meta.env.VITE_API_URL}/reviews/${id}`,
                     reviewForm,
                     { headers: { Authorization: `Bearer ${token}` } }
                   );
                   setReviewForm({ rating: 5, comment: "" });
                   const res = await axios.get(
-                    `http://localhost:5000/api/reviews/${id}`
+                    `${import.meta.env.VITE_API_URL}/reviews/${id}`
                   );
                   setReviews(res.data);
                 } catch (_) {}

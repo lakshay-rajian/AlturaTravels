@@ -18,7 +18,7 @@ export default function Booking() {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/packages");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/packages`);
         setPackages(res.data);
         const preselect = params.get("packageId");
         if (preselect) {
@@ -46,7 +46,7 @@ export default function Booking() {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/bookings",
+        `${import.meta.env.VITE_API_URL}/bookings`,
         { ...form },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
