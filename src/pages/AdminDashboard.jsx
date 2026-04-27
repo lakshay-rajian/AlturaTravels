@@ -46,6 +46,7 @@ export default function AdminDashboard() {
     author: "",
     image: "",
   });
+  const [blogImageFile, setBlogImageFile] = useState(null);
   const [blogEditingId, setBlogEditingId] = useState(null);
   // Enquiries state
   const [enquiries, setEnquiries] = useState([]);
@@ -124,7 +125,7 @@ export default function AdminDashboard() {
           fd,
           { headers: { Authorization: `Bearer ${token}` } },
         );
-        imageUrl = `${import.meta.env.VITE_IMAGE_URL}${up.data.url}`;
+        imageUrl = up.data.url;
       }
       if (imageUrl?.startsWith("/uploads/")) {
         imageUrl = `${import.meta.env.VITE_IMAGE_URL}${imageUrl}`;
@@ -198,10 +199,25 @@ export default function AdminDashboard() {
   const submitBlog = async (e) => {
     e.preventDefault();
     try {
+      let imageUrl = blogForm.image;
+      if (blogImageFile) {
+        const fd = new FormData();
+        fd.append("image", blogImageFile);
+        const up = await axios.post(
+          `${import.meta.env.VITE_API_URL}/uploads/image`,
+          fd,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        imageUrl = up.data.url;
+      }
+      if (imageUrl?.startsWith("/uploads/")) {
+        imageUrl = `${import.meta.env.VITE_IMAGE_URL}${imageUrl}`;
+      }
+
       if (blogEditingId) {
         const res = await axios.put(
           `${import.meta.env.VITE_API_URL}/blogs/${blogEditingId}`,
-          blogForm,
+          { ...blogForm, image: imageUrl },
           { headers: { Authorization: `Bearer ${token}` } },
         );
         setBlogs((prev) =>
@@ -210,12 +226,13 @@ export default function AdminDashboard() {
       } else {
         const res = await axios.post(
           `${import.meta.env.VITE_API_URL}/blogs`,
-          blogForm,
+          { ...blogForm, image: imageUrl },
           { headers: { Authorization: `Bearer ${token}` } },
         );
         setBlogs((prev) => [res.data, ...prev]);
       }
       setBlogForm({ title: "", content: "", author: "", image: "" });
+      setBlogImageFile(null);
       setBlogEditingId(null);
     } catch (_) {}
   };
@@ -655,6 +672,12 @@ export default function AdminDashboard() {
                   setBlogForm({ ...blogForm, image: e.target.value })
                 }
                 placeholder="Image URL"
+                className="px-3 py-2 border rounded"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setBlogImageFile(e.target.files?.[0] || null)}
                 className="px-3 py-2 border rounded"
               />
               <textarea
