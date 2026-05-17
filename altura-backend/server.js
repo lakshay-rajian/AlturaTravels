@@ -35,9 +35,13 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
