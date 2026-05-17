@@ -8,6 +8,7 @@ const packageSchema = new mongoose.Schema({
   location: { type: String, required: true }, // e.g. "Manali, Himachal Pradesh"
   duration: { type: String, required: true }, // e.g. "3 Nights / 4 Days"
   image: { type: String }, // optional, store image URL
+  isFeatured: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 

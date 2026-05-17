@@ -21,12 +21,16 @@ export default function Home() {
         const pkgRes = await axios.get(
           `${import.meta.env.VITE_API_URL}/packages`,
         );
-        setFeaturedPackages(pkgRes.data.slice(0, 3));
+        const allPkgs = pkgRes.data;
+        const featuredPkgs = allPkgs.filter(p => p.isFeatured);
+        setFeaturedPackages(featuredPkgs.length > 0 ? featuredPkgs.slice(0, 3) : allPkgs.slice(0, 3));
 
         const blogRes = await axios.get(
           `${import.meta.env.VITE_API_URL}/blogs`,
         );
-        setLatestBlogs(blogRes.data.slice(0, 3));
+        const allBlogs = blogRes.data;
+        const featuredBlogs = allBlogs.filter(b => b.isFeatured);
+        setLatestBlogs(featuredBlogs.length > 0 ? featuredBlogs.slice(0, 3) : allBlogs.slice(0, 3));
       } catch (err) {
         console.error("Error fetching home data:", err);
       }

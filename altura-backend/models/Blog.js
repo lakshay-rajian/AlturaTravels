@@ -5,6 +5,8 @@ const blogSchema = new mongoose.Schema({
   content: { type: String, required: true },
   author: { type: String },
   image: { type: String },
+  category: { type: String, default: "General" },
+  isFeatured: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

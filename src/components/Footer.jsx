@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1A365D] text-white">
+    <footer className="bg-[#2E4D38] text-white">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -15,15 +15,15 @@ export default function Footer() {
             </p>
             <div className="flex space-x-3 mt-6">
               <a href="https://www.instagram.com/thealturatravels/" target="_blank" rel="noopener noreferrer" 
-                className="bg-white text-[#1A365D] p-2 rounded-full hover:bg-gray-200 transition-colors">
+                className="bg-white text-[#2E4D38] p-2 rounded-full hover:bg-gray-200 transition-colors">
                 <Instagram size={18} />
               </a>
               <a href="https://www.facebook.com/profile.php?id=61577203546031" target="_blank" rel="noopener noreferrer" 
-                className="bg-white text-[#1A365D] p-2 rounded-full hover:bg-gray-200 transition-colors">
+                className="bg-white text-[#2E4D38] p-2 rounded-full hover:bg-gray-200 transition-colors">
                 <Facebook size={18} />
               </a>
               <a href="http://linkedin.com/in/altura-travels-a9b0b5373/" target="_blank" rel="noopener noreferrer" 
-                className="bg-white text-[#1A365D] p-2 rounded-full hover:bg-gray-200 transition-colors">
+                className="bg-white text-[#2E4D38] p-2 rounded-full hover:bg-gray-200 transition-colors">
                 <Linkedin size={18} />
               </a>
             </div>
@@ -67,7 +67,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-700 py-6 bg-[#0F2A4A]">
+      <div className="border-t border-green-900 py-6 bg-[#24402e]">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-gray-400">&copy; {new Date().getFullYear()} Altura Travels. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0 text-sm text-gray-400">

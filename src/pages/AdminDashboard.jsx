@@ -34,6 +34,7 @@ export default function AdminDashboard() {
     location: "",
     duration: "",
     image: "",
+    isFeatured: false,
   });
   const [pkgImageFile, setPkgImageFile] = useState(null);
   const [pkgEditingId, setPkgEditingId] = useState(null);
@@ -45,6 +46,8 @@ export default function AdminDashboard() {
     content: "",
     author: "",
     image: "",
+    category: "General",
+    isFeatured: false,
   });
   const [blogImageFile, setBlogImageFile] = useState(null);
   const [blogEditingId, setBlogEditingId] = useState(null);
@@ -154,6 +157,7 @@ export default function AdminDashboard() {
         location: "",
         duration: "",
         image: "",
+        isFeatured: false,
       });
       setPkgImageFile(null);
       setPkgEditingId(null);
@@ -170,6 +174,7 @@ export default function AdminDashboard() {
       location: p.location,
       duration: p.duration,
       image: p.image || "",
+      isFeatured: p.isFeatured || false,
     });
   };
 
@@ -231,7 +236,14 @@ export default function AdminDashboard() {
         );
         setBlogs((prev) => [res.data, ...prev]);
       }
-      setBlogForm({ title: "", content: "", author: "", image: "" });
+      setBlogForm({
+        title: "",
+        content: "",
+        author: "",
+        image: "",
+        category: "General",
+        isFeatured: false,
+      });
       setBlogImageFile(null);
       setBlogEditingId(null);
     } catch (_) {}
@@ -244,6 +256,8 @@ export default function AdminDashboard() {
       content: b.content,
       author: b.author || "",
       image: b.image || "",
+      category: b.category || "General",
+      isFeatured: b.isFeatured || false,
     });
   };
 
@@ -416,7 +430,7 @@ export default function AdminDashboard() {
                         Travelers
                       </th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        User Email
+                        User Info
                       </th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                         Status
@@ -434,7 +448,14 @@ export default function AdminDashboard() {
                           {new Date(b.date).toLocaleDateString()}
                         </td>
                         <td className="px-4 py-3">{b.travelers}</td>
-                        <td className="px-4 py-3">{b.userId?.email || "-"}</td>
+                        <td className="px-4 py-3">
+                          <div className="text-sm font-medium text-gray-900">
+                            {b.userId?.name || "Guest"}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {b.userId?.email || "-"}
+                          </div>
+                        </td>
                         <td className="px-4 py-3 capitalize">{b.status}</td>
                         <td className="px-4 py-3 space-x-2">
                           <button
@@ -461,6 +482,7 @@ export default function AdminDashboard() {
                         "Package",
                         "Date",
                         "Travelers",
+                        "Name",
                         "Email",
                         "Status",
                       ];
@@ -468,6 +490,7 @@ export default function AdminDashboard() {
                         b.packageName,
                         new Date(b.date).toLocaleDateString(),
                         String(b.travelers),
+                        b.userId?.name || "",
                         b.userId?.email || "",
                         b.status,
                       ]);
@@ -545,6 +568,22 @@ export default function AdminDashboard() {
                 className="px-3 py-2 border rounded"
                 required
               />
+              <label className="flex items-center gap-2 px-3 py-2 border rounded bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={pkgForm.isFeatured}
+                  onChange={(e) =>
+                    setPkgForm({
+                      ...pkgForm,
+                      isFeatured: e.target.checked,
+                    })
+                  }
+                  className="w-4 h-4 text-green-600"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Featured Package
+                </span>
+              </label>
               <input
                 value={pkgForm.image}
                 onChange={(e) =>
@@ -609,7 +648,14 @@ export default function AdminDashboard() {
                 <div key={p._id} className="bg-white border rounded-lg p-4">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-lg font-semibold">{p.name}</h3>
+                      <h3 className="text-lg font-semibold flex items-center gap-2">
+                        {p.name}
+                        {p.isFeatured && (
+                          <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-full uppercase">
+                            Featured
+                          </span>
+                        )}
+                      </h3>
                       <p className="text-sm text-gray-500">
                         {p.location} • {p.duration}
                       </p>
@@ -666,6 +712,37 @@ export default function AdminDashboard() {
                 placeholder="Author"
                 className="px-3 py-2 border rounded"
               />
+              <div className="grid grid-cols-2 gap-4">
+                <select
+                  value={blogForm.category}
+                  onChange={(e) =>
+                    setBlogForm({ ...blogForm, category: e.target.value })
+                  }
+                  className="px-3 py-2 border rounded"
+                  required
+                >
+                  <option value="General">General</option>
+                  <option value="Adventure">Adventure</option>
+                  <option value="Luxury">Luxury</option>
+                  <option value="Nature">Nature</option>
+                </select>
+                <label className="flex items-center gap-2 px-3 py-2 border rounded bg-gray-50 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={blogForm.isFeatured}
+                    onChange={(e) =>
+                      setBlogForm({
+                        ...blogForm,
+                        isFeatured: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 text-green-600"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Featured Blog
+                  </span>
+                </label>
+              </div>
               <input
                 value={blogForm.image}
                 onChange={(e) =>
@@ -722,9 +799,16 @@ export default function AdminDashboard() {
                 <div key={b._id} className="bg-white border rounded-lg p-4">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-lg font-semibold">{b.title}</h3>
+                      <h3 className="text-lg font-semibold flex items-center gap-2">
+                        {b.title}
+                        {b.isFeatured && (
+                          <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-full uppercase">
+                            Featured
+                          </span>
+                        )}
+                      </h3>
                       <p className="text-sm text-gray-500">
-                        {b.author || "Unknown"}
+                        {b.author || "Unknown"} • {b.category || "General"}
                       </p>
                       <p className="mt-1 text-gray-700 line-clamp-2">
                         {b.content}
