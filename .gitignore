@@ -37,8 +37,7 @@ lerna-debug.log*
 *.sw?
 
 # Backend specific
-altura-backend/uploads/*
-!altura-backend/uploads/.gitkeep
+# (We allow uploads so the seed images are deployed to Render)
 
 # OS generated files
 Thumbs.db
