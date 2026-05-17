@@ -16,7 +16,7 @@ router.get("/", async (_req, res) => {
 });
 
 // Public: get blog by id
-router.get(":id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ message: "Blog not found" });
@@ -37,7 +37,7 @@ router.post("/", authMiddleware, adminOnly, async (req, res) => {
 });
 
 // Admin-only: update
-router.put(":id", authMiddleware, adminOnly, async (req, res) => {
+router.put("/:id", authMiddleware, adminOnly, async (req, res) => {
   try {
     const updated = await Blog.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) return res.status(404).json({ message: "Blog not found" });
@@ -48,7 +48,7 @@ router.put(":id", authMiddleware, adminOnly, async (req, res) => {
 });
 
 // Admin-only: delete
-router.delete(":id", authMiddleware, adminOnly, async (req, res) => {
+router.delete("/:id", authMiddleware, adminOnly, async (req, res) => {
   try {
     const deleted = await Blog.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: "Blog not found" });
