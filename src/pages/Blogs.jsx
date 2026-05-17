@@ -102,7 +102,7 @@ export default function Blogs() {
                 <img
                   src={
                     blog.image.startsWith("/uploads/")
-                      ? `${import.meta.env.VITE_IMAGE_URL}${blog.image}`
+                      ? `${(import.meta.env.VITE_IMAGE_URL || import.meta.env.VITE_API_URL.replace('/api', ''))}${blog.image}`
                       : blog.image
                   }
                   alt={blog.title}

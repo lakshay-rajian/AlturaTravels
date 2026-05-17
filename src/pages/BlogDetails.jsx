@@ -59,7 +59,7 @@ export default function BlogDetails() {
       <section
         className="relative bg-cover bg-center h-[50vh] "
         style={{
-          backgroundImage: `url(${blog.image?.startsWith("/uploads/") ? `${import.meta.env.VITE_IMAGE_URL}${blog.image}` : blog.image || "/blog-details-hero.jpg"})`,
+          backgroundImage: `url(${blog.image?.startsWith("/uploads/") ? `${(import.meta.env.VITE_IMAGE_URL || import.meta.env.VITE_API_URL.replace('/api', ''))}${blog.image}` : blog.image || "/blog-details-hero.jpg"})`,
         }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
@@ -81,7 +81,7 @@ export default function BlogDetails() {
           <img
             src={
               blog.image?.startsWith("/uploads/")
-                ? `${import.meta.env.VITE_IMAGE_URL}${blog.image}`
+                ? `${(import.meta.env.VITE_IMAGE_URL || import.meta.env.VITE_API_URL.replace('/api', ''))}${blog.image}`
                 : blog.image
             }
             alt={blog.title}

@@ -107,7 +107,7 @@ export default function Packages() {
               {/* Image */}
               {pkg.image && (
                 <img
-                  src={pkg.image.startsWith("/uploads/") ? `${import.meta.env.VITE_IMAGE_URL}${pkg.image}` : pkg.image}
+                  src={pkg.image.startsWith("/uploads/") ? `${(import.meta.env.VITE_IMAGE_URL || import.meta.env.VITE_API_URL.replace('/api', ''))}${pkg.image}` : pkg.image}
                   alt={pkg.name}
                   className="w-full h-56 object-cover"
                   loading="lazy"

@@ -112,7 +112,7 @@ export default function Home() {
                   <img
                     src={
                       pkg.image?.startsWith("/uploads/")
-                        ? `${import.meta.env.VITE_IMAGE_URL}${pkg.image}`
+                        ? `${(import.meta.env.VITE_IMAGE_URL || import.meta.env.VITE_API_URL.replace('/api', ''))}${pkg.image}`
                         : pkg.image
                     }
                     alt={pkg.name}
@@ -212,7 +212,7 @@ export default function Home() {
                     <img
                       src={
                         blog.image?.startsWith("/uploads/")
-                          ? `${import.meta.env.VITE_IMAGE_URL}${blog.image}`
+                          ? `${(import.meta.env.VITE_IMAGE_URL || import.meta.env.VITE_API_URL.replace('/api', ''))}${blog.image}`
                           : blog.image
                       }
                       alt={blog.title}

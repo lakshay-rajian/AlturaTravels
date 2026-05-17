@@ -131,7 +131,7 @@ export default function AdminDashboard() {
         imageUrl = up.data.url;
       }
       if (imageUrl?.startsWith("/uploads/")) {
-        imageUrl = `${import.meta.env.VITE_IMAGE_URL}${imageUrl}`;
+        imageUrl = `${(import.meta.env.VITE_IMAGE_URL || import.meta.env.VITE_API_URL.replace('/api', ''))}${imageUrl}`;
       }
       if (pkgEditingId) {
         const res = await axios.put(
@@ -216,7 +216,7 @@ export default function AdminDashboard() {
         imageUrl = up.data.url;
       }
       if (imageUrl?.startsWith("/uploads/")) {
-        imageUrl = `${import.meta.env.VITE_IMAGE_URL}${imageUrl}`;
+        imageUrl = `${(import.meta.env.VITE_IMAGE_URL || import.meta.env.VITE_API_URL.replace('/api', ''))}${imageUrl}`;
       }
 
       if (blogEditingId) {
