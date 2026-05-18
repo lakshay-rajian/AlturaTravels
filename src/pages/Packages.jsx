@@ -1,8 +1,10 @@
 // src/pages/Packages.jsx
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function Packages() {
+  const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
   const [error, setError] = useState("");
   const [q, setQ] = useState("");
@@ -116,7 +118,8 @@ export default function Packages() {
           {filtered.map((pkg) => (
             <div
               key={pkg._id}
-              className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200 hover:shadow-xl transition"
+              onClick={() => navigate(`/packages/${pkg._id}`)}
+              className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200 hover:shadow-xl transition transform hover:-translate-y-2 cursor-pointer"
             >
               {/* Image */}
               {pkg.image && (
@@ -142,7 +145,8 @@ export default function Packages() {
                 </p>
 
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     const token = localStorage.getItem("token");
                     const redirect = encodeURIComponent(
                       `/bookings?packageId=${pkg._id}`
