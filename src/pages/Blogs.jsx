@@ -93,9 +93,10 @@ export default function Blogs() {
         ) : filteredBlogs.length > 0 ? (
           <div className="grid md:grid-cols-3 gap-10">
             {filteredBlogs.map((blog) => (
-              <div
+              <Link
+                to={`/blogs/${blog._id}`}
                 key={blog._id}
-                className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2"
+                className="block bg-white rounded-xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 cursor-pointer"
               >
                 {/* Blog Image */}
                 <img
@@ -130,13 +131,13 @@ export default function Blogs() {
                   </div>
 
                   {/* Read More Button */}
-                  <Link to={`/blogs/${blog._id}`}>
-                    <button className="mt-4 px-5 py-2 bg-[#2E4D38] text-white text-sm font-medium rounded-full hover:bg-[#24402e] transition">
+                  <div className="mt-4">
+                    <span className="inline-block px-5 py-2 bg-[#2E4D38] text-white text-sm font-medium rounded-full hover:bg-[#24402e] transition">
                       Read More →
-                    </button>
-                  </Link>
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
