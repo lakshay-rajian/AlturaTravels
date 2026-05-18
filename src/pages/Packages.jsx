@@ -43,10 +43,24 @@ export default function Packages() {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-16">
-      <h1 className="text-4xl font-bold text-center text-[#2E4D38] mb-12">
-        Explore Our Travel Packages
-      </h1>
+    <div>
+      {/* Hero Section */}
+      <section className="relative h-[50vh] flex flex-col items-center justify-center bg-gradient-to-tr from-[#12311f] to-[#2E4D38] overflow-hidden">
+        {/* Vibrant Contrast Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-[10%] right-[5%] w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-pulse"></div>
+          <div className="absolute bottom-[0%] left-[5%] w-80 h-80 bg-teal-400 rounded-full mix-blend-screen filter blur-[120px] opacity-40"></div>
+        </div>
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-6 mt-10">
+          <h1 className="text-5xl md:text-6xl font-black tracking-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] text-white">Travel Packages</h1>
+          <div className="w-32 h-1.5 bg-indigo-400 mt-6 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.8)]"></div>
+          <p className="mt-6 text-lg md:text-xl text-gray-100 font-medium max-w-2xl drop-shadow-md">
+            Explore our carefully curated selection of breathtaking destinations.
+          </p>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-6 py-16">
 
       {/* Filters */}
       <div className="mb-8 bg-white p-4 rounded-xl shadow border grid md:grid-cols-4 gap-4">
@@ -148,6 +162,7 @@ export default function Packages() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
