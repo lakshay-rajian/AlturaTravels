@@ -30,16 +30,16 @@ export default function Enquiry() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative h-[50vh] flex flex-col items-center justify-center bg-gradient-to-br from-[#1A2E22] via-[#2E4D38] to-[#1A2E22] overflow-hidden">
-        {/* Abstract decorative background */}
+      <section className="relative h-[50vh] flex flex-col items-center justify-center bg-gradient-to-t from-[#2E4D38] to-[#12311f] overflow-hidden">
+        {/* Vibrant Contrast Background Elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-[-10%] right-[10%] w-96 h-96 bg-yellow-500 rounded-full mix-blend-overlay filter blur-[128px] opacity-40 animate-pulse"></div>
-          <div className="absolute bottom-[-20%] left-[-10%] w-80 h-80 bg-green-400 rounded-full mix-blend-overlay filter blur-[128px] opacity-20"></div>
+          <div className="absolute top-[-10%] right-[10%] w-96 h-96 bg-fuchsia-500 rounded-full mix-blend-screen filter blur-[100px] opacity-60 animate-pulse"></div>
+          <div className="absolute bottom-[-10%] left-[-5%] w-80 h-80 bg-orange-500 rounded-full mix-blend-screen filter blur-[120px] opacity-40"></div>
         </div>
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-6 mt-10">
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-wide drop-shadow-2xl text-white">Have an Enquiry?</h1>
-          <div className="w-24 h-1 bg-yellow-500 mt-6 rounded-full shadow-[0_0_10px_rgba(234,179,8,0.8)]"></div>
-          <p className="mt-6 text-lg md:text-xl text-gray-200 font-light max-w-2xl drop-shadow-md">
+          <h1 className="text-5xl md:text-6xl font-black tracking-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] text-white">Have an Enquiry?</h1>
+          <div className="w-32 h-1.5 bg-fuchsia-400 mt-6 rounded-full shadow-[0_0_15px_rgba(217,70,239,0.8)]"></div>
+          <p className="mt-6 text-lg md:text-xl text-gray-100 font-medium max-w-2xl drop-shadow-md">
             Get in touch with us and we’ll help you plan your next trip.
           </p>
         </div>
