@@ -30,21 +30,16 @@ export default function Enquiry() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative h-[50vh] flex items-center justify-center">
-        {/* Background */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/enquiry-hero.jpg')" }}
-        ></div>
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-
-        {/* Text */}
-        <div className="relative z-10 text-center text-white px-4">
-          <h1 className="text-4xl md:text-5xl font-bold drop-shadow-lg">
-            Have an Enquiry?
-          </h1>
-          <p className="mt-3 text-lg max-w-2xl mx-auto">
+      <section className="relative h-[50vh] flex flex-col items-center justify-center bg-gradient-to-br from-[#1A2E22] via-[#2E4D38] to-[#1A2E22] overflow-hidden">
+        {/* Abstract decorative background */}
+        <div className="absolute inset-0">
+          <div className="absolute top-[-10%] right-[10%] w-96 h-96 bg-yellow-500 rounded-full mix-blend-overlay filter blur-[128px] opacity-40 animate-pulse"></div>
+          <div className="absolute bottom-[-20%] left-[-10%] w-80 h-80 bg-green-400 rounded-full mix-blend-overlay filter blur-[128px] opacity-20"></div>
+        </div>
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-6 mt-10">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-wide drop-shadow-2xl text-white">Have an Enquiry?</h1>
+          <div className="w-24 h-1 bg-yellow-500 mt-6 rounded-full shadow-[0_0_10px_rgba(234,179,8,0.8)]"></div>
+          <p className="mt-6 text-lg md:text-xl text-gray-200 font-light max-w-2xl drop-shadow-md">
             Get in touch with us and we’ll help you plan your next trip.
           </p>
         </div>
