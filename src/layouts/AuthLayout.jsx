@@ -5,24 +5,33 @@ export default function AuthLayout({ children, title, subtitle }) {
   return (
     <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
       {/* Left Hero Section */}
-      <div className="relative hidden md:block">
+      <div className="relative hidden md:block overflow-hidden bg-[#12311f]">
         <img
-          src="/travel-bg.jpg" // add travel image inside /public
+          src="/hero.jpg"
           alt="Travel background"
-          className="h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover opacity-60"
         />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#2E4D38]/80 via-[#2E4D38]/70 to-yellow-500/40"></div>
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-10 text-center">
-          <img
-            src="/logo.jpg" // your logo in /public
-            alt="Altura Travels Logo"
-            className="w-36 h-28 mb-6 drop-shadow-lg"
-          />
-          <h1 className="text-4xl font-bold drop-shadow-md">Altura Travels</h1>
-          <p className="mt-4 text-lg max-w-sm text-yellow-200 drop-shadow-sm">
+        {/* Vibrant Gradient Overlay & Blooms */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#2E4D38]/90 via-[#12311f]/80 to-[#2E4D38]/90 mix-blend-multiply"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-[10%] left-[10%] w-80 h-80 bg-amber-500 rounded-full mix-blend-screen filter blur-[100px] opacity-50 animate-pulse"></div>
+          <div className="absolute bottom-[10%] right-[10%] w-96 h-96 bg-teal-400 rounded-full mix-blend-screen filter blur-[120px] opacity-40"></div>
+        </div>
+
+        <div className="relative z-10 flex flex-col justify-center items-center text-white h-full p-10 text-center">
+          <div className="relative">
+            <div className="absolute inset-0 bg-white rounded-full filter blur-[30px] opacity-20"></div>
+            <img
+              src="/logo.jpg"
+              alt="Altura Travels Logo"
+              className="relative w-36 h-36 object-cover rounded-full mb-6 border-4 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]"
+            />
+          </div>
+          <h1 className="text-5xl font-black tracking-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]">Altura Travels</h1>
+          <div className="w-24 h-1.5 bg-amber-400 mt-4 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)]"></div>
+          <p className="mt-6 text-xl max-w-sm text-gray-100 font-medium drop-shadow-md">
             Discover the world with us.  
-            Your next adventure starts here!
+            <br />Your next adventure starts here!
           </p>
         </div>
       </div>
