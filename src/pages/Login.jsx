@@ -35,7 +35,7 @@ export default function Login() {
         navigate(redirect);
       } else {
         navigate(
-          data.user?.role === "admin" ? "/admin/dashboard" : "/bookings"
+          data.user?.role === "admin" ? "/" : "/bookings"
         );
       }
     } catch (err) {

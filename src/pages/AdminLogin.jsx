@@ -29,7 +29,7 @@ export default function AdminLogin() {
       }
 
       login(data.token, data.user);
-      navigate("/admin/dashboard");
+      navigate("/");
     } catch (err) {
       setError(err.message);
     }
