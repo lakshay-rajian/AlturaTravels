@@ -106,7 +106,8 @@ export default function Home() {
             {featuredPackages.map((pkg) => (
               <div
                 key={pkg._id}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group transition hover:shadow-2xl"
+                onClick={() => window.location.href = `/packages/${pkg._id}`}
+                className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group transition hover:shadow-2xl cursor-pointer flex flex-col"
               >
                 <div className="relative h-64 overflow-hidden">
                   <img
@@ -122,22 +123,36 @@ export default function Home() {
                     ₹{pkg.price}
                   </div>
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold text-[#2E4D38]">
                     {pkg.name}
                   </h3>
                   <p className="text-gray-500 text-sm mb-3">
                     {pkg.location} • {pkg.duration}
                   </p>
-                  <p className="text-gray-600 line-clamp-2 text-sm mb-4">
+                  <p className="text-gray-600 line-clamp-2 text-sm mb-4 flex-1">
                     {pkg.description}
                   </p>
-                  <Link
-                    to={`/packages/${pkg._id}`}
-                    className="block text-center py-2 bg-gray-50 text-[#2E4D38] border border-[#2E4D38]/20 rounded-lg font-medium hover:bg-[#2E4D38] hover:text-white transition"
-                  >
-                    Details
-                  </Link>
+                  <div className="flex gap-3 mt-auto">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const token = localStorage.getItem("token");
+                        const redirect = encodeURIComponent(`/bookings?packageId=${pkg._id}`);
+                        window.location.href = token ? `/bookings?packageId=${pkg._id}` : `/login?redirect=${redirect}`;
+                      }}
+                      className="flex-1 py-2 bg-[#2E4D38] text-white rounded-lg font-medium hover:bg-yellow-500 hover:text-[#2E4D38] transition text-sm"
+                    >
+                      Book Now
+                    </button>
+                    <Link
+                      to={`/packages/${pkg._id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex-1 block text-center py-2 bg-gray-50 text-[#2E4D38] border border-[#2E4D38]/20 rounded-lg font-medium hover:bg-[#2E4D38] hover:text-white transition text-sm"
+                    >
+                      Details
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
