@@ -124,7 +124,9 @@ router.post("/", authMiddleware, async (req, res) => {
  */
 router.get("/my", authMiddleware, async (req, res) => {
   try {
-    const bookings = await Booking.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const bookings = await Booking.find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate("packageId");
     res.json(bookings);
   } catch (err) {
     console.error(err);

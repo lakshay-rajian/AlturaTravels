@@ -1,10 +1,11 @@
 // src/pages/Booking.jsx
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import AuthLayout from "../layouts/AuthLayout";
 
 export default function Booking() {
+  const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
   const [params] = useSearchParams();
   const [form, setForm] = useState({
@@ -45,7 +46,7 @@ export default function Booking() {
     setSuccess("");
 
     try {
-      await axios.post(
+      const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/bookings`,
         { ...form },
         {
@@ -53,8 +54,7 @@ export default function Booking() {
         }
       );
 
-      setSuccess("Booking successful!");
-      setForm({ packageId: "", travelers: 1, date: "" });
+      navigate(`/booking-success/${res.data.booking._id}`);
     } catch (err) {
       setError("Booking failed. Please try again.");
     }

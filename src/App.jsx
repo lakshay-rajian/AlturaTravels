@@ -9,6 +9,7 @@ import Enquiry from "./pages/Enquiry";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Booking from "./pages/Booking";
+import BookingSuccess from "./pages/BookingSuccess";
 import MyBookings from "./pages/MyBookings";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -47,6 +48,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Booking />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/booking-success/:id"
+            element={
+              <ProtectedRoute>
+                <BookingSuccess />
               </ProtectedRoute>
             }
           />

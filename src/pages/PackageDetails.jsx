@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import MainLayout from "../layouts/MainLayout";
 
@@ -13,6 +13,8 @@ export default function PackageDetails() {
   const [message, setMessage] = useState("");
   const [reviews, setReviews] = useState([]);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPkg = async () => {
@@ -39,13 +41,12 @@ export default function PackageDetails() {
     e.preventDefault();
     setMessage("");
     try {
-      await axios.post(
+      const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/bookings`,
         { packageId: id, travelers: Number(form.travelers), date: form.date },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setMessage("Booking successful! A confirmation email has been sent.");
-      setForm({ date: "", travelers: 1 });
+      navigate(`/booking-success/${res.data.booking._id}`);
     } catch (_) {
       setMessage("Booking failed. Please try again.");
     }
