@@ -53,7 +53,7 @@ export default function PackageDetails() {
   };
 
   return (
-    <MainLayout>
+    <>
       <div className="max-w-7xl mx-auto px-6 py-10 grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           {loading ? (
@@ -220,6 +220,6 @@ export default function PackageDetails() {
           </div>
         </div>
       </div>
-    </MainLayout>
+    </>
   );
 }
