@@ -6,7 +6,7 @@ export default function BookingSuccess() {
   const { id } = useParams();
 
   return (
-    <MainLayout>
+    <>
       <div className="min-h-[70vh] flex items-center justify-center bg-gray-50 px-6 py-12">
         <div className="bg-white rounded-3xl shadow-xl p-10 md:p-16 max-w-lg w-full text-center border border-gray-100 relative overflow-hidden">
           {/* Decorative Background Elements */}
@@ -54,6 +54,6 @@ export default function BookingSuccess() {
           </div>
         </div>
       </div>
-    </MainLayout>
+    </>
   );
 }

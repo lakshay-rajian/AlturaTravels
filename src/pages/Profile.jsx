@@ -80,7 +80,7 @@ export default function Profile() {
   );
 
   return (
-    <MainLayout>
+    <>
       <div className="bg-gray-50 min-h-screen py-10 px-6">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
           
@@ -245,6 +245,6 @@ export default function Profile() {
 
         </div>
       </div>
-    </MainLayout>
+    </>
   );
 }

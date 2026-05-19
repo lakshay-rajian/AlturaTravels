@@ -71,7 +71,7 @@ export default function MyBookings() {
   };
 
   return (
-    <MainLayout>
+    <>
       <div className="bg-gray-50 min-h-screen py-10 px-6">
         <div className="max-w-5xl mx-auto">
           {/* Dashboard Header */}
@@ -200,6 +200,6 @@ export default function MyBookings() {
           )}
         </div>
       </div>
-    </MainLayout>
+    </>
   );
 }
