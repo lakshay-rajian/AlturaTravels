@@ -55,15 +55,18 @@ router.post("/", authMiddleware, async (req, res) => {
     (async () => {
       try {
         let transporter;
+        const smtpUser = process.env.EMAIL_USER || process.env.ADMIN_EMAIL;
+        const smtpPass = process.env.EMAIL_PASS;
         
-        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        if (smtpUser && smtpPass) {
           // Use real credentials if provided
           transporter = nodemailer.createTransport({
-            service: "Gmail",
-            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+            service: "gmail",
+            auth: { user: smtpUser, pass: smtpPass },
           });
         } else {
           // Use Ethereal for testing if no credentials are set
+          console.warn("⚠️ EMAIL_PASS not set in environment. Falling back to Ethereal test email account.");
           const testAccount = await nodemailer.createTestAccount();
           transporter = nodemailer.createTransport({
             host: "smtp.ethereal.email",
@@ -71,7 +74,6 @@ router.post("/", authMiddleware, async (req, res) => {
             secure: false,
             auth: { user: testAccount.user, pass: testAccount.pass },
           });
-          console.log("Using Ethereal for testing booking email...");
         }
 
         const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
@@ -118,9 +120,10 @@ router.post("/", authMiddleware, async (req, res) => {
         }
 
         const info = await transporter.sendMail(mailOptions);
+        console.log(`Booking email sent successfully to ${user.email}. MessageId: ${info.messageId}`);
 
-        if (!process.env.EMAIL_USER) {
-          console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        if (!smtpPass) {
+          console.log("Preview URL (Ethereal): %s", nodemailer.getTestMessageUrl(info));
         }
       } catch (emailErr) {
         console.error("Email send failed:", emailErr.message);

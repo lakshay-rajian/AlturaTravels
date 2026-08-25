@@ -54,9 +54,21 @@ export default function AdminDashboard() {
   // Enquiries state
   const [enquiries, setEnquiries] = useState([]);
 
-  const fetchBookings = async () => {
+  const [bookingStatusFilter, setBookingStatusFilter] = useState("all");
+
+  const cancelledBookings = useMemo(
+    () => bookings.filter((b) => b.status === "cancelled").length,
+    [bookings],
+  );
+
+  const filteredBookings = useMemo(() => {
+    if (bookingStatusFilter === "all") return bookings;
+    return bookings.filter((b) => b.status === bookingStatusFilter);
+  }, [bookings, bookingStatusFilter]);
+
+  const fetchBookings = async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       setError("");
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/bookings/admin`,
@@ -68,7 +80,7 @@ export default function AdminDashboard() {
     } catch (err) {
       setError("Failed to load bookings");
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
@@ -89,8 +101,8 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeTab === "overview" || activeTab === "bookings") {
-      fetchBookings();
-      const id = setInterval(fetchBookings, 5000);
+      fetchBookings(true);
+      const id = setInterval(() => fetchBookings(false), 5000);
       return () => clearInterval(id);
     } else if (activeTab === "enquiries") {
       fetchEnquiries();
@@ -407,75 +419,166 @@ export default function AdminDashboard() {
 
         {activeTab === "bookings" && (
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">
-              Manage Bookings
-            </h1>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">
+                  Manage Bookings
+                </h1>
+                <p className="text-sm text-gray-500">
+                  View, filter, and manage customer package bookings
+                </p>
+              </div>
+
+              {/* Sub-filter tabs */}
+              <div className="flex flex-wrap gap-2 bg-white p-1.5 rounded-xl border shadow-sm">
+                <button
+                  onClick={() => setBookingStatusFilter("all")}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
+                    bookingStatusFilter === "all"
+                      ? "bg-gray-800 text-white shadow-sm"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  All ({bookings.length})
+                </button>
+                <button
+                  onClick={() => setBookingStatusFilter("pending")}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
+                    bookingStatusFilter === "pending"
+                      ? "bg-amber-600 text-white shadow-sm"
+                      : "text-amber-700 bg-amber-50 hover:bg-amber-100"
+                  }`}
+                >
+                  <span>Pending</span>
+                  <span className="bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded-full text-[10px]">
+                    {pendingBookings}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setBookingStatusFilter("confirmed")}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
+                    bookingStatusFilter === "confirmed"
+                      ? "bg-emerald-700 text-white shadow-sm"
+                      : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                  }`}
+                >
+                  <span>Confirmed</span>
+                  <span className="bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded-full text-[10px]">
+                    {confirmedBookings}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setBookingStatusFilter("cancelled")}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 ${
+                    bookingStatusFilter === "cancelled"
+                      ? "bg-rose-700 text-white shadow-sm"
+                      : "text-rose-700 bg-rose-50 hover:bg-rose-100"
+                  }`}
+                >
+                  <span>Cancelled</span>
+                  <span className="bg-rose-200 text-rose-900 px-1.5 py-0.5 rounded-full text-[10px]">
+                    {cancelledBookings}
+                  </span>
+                </button>
+              </div>
+            </div>
+
             {error && <p className="text-red-600 mb-4">{error}</p>}
+
             {loading ? (
-              <p className="text-gray-600">Loading...</p>
-            ) : bookings.length === 0 ? (
-              <p className="text-gray-600">No bookings yet.</p>
+              <div className="p-8 text-center bg-white border rounded-lg shadow-sm">
+                <p className="text-gray-500">Loading bookings...</p>
+              </div>
+            ) : filteredBookings.length === 0 ? (
+              <div className="p-8 text-center bg-white border rounded-lg shadow-sm">
+                <p className="text-gray-500">
+                  No {bookingStatusFilter !== "all" ? bookingStatusFilter : ""} bookings found.
+                </p>
+              </div>
             ) : (
-              <div className="overflow-x-auto bg-white border rounded-lg">
-                <table className="min-w-full">
+              <div className="overflow-x-auto bg-white border rounded-lg shadow-sm">
+                <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Package
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Travelers
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        User Info
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        User Details
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {bookings.map((b) => (
-                      <tr key={b._id} className="border-t">
-                        <td className="px-4 py-3">{b.packageName}</td>
-                        <td className="px-4 py-3">
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {filteredBookings.map((b) => (
+                      <tr key={b._id} className="hover:bg-gray-50 transition">
+                        <td className="px-4 py-4 text-sm font-semibold text-gray-900">
+                          {b.packageName}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-600">
                           {new Date(b.date).toLocaleDateString()}
                         </td>
-                        <td className="px-4 py-3">{b.travelers}</td>
-                        <td className="px-4 py-3">
-                          <div className="text-sm font-medium text-gray-900">
-                            {b.userId?.name || "Guest"}
+                        <td className="px-4 py-4 text-sm text-gray-600">
+                          {b.travelers} {b.travelers === 1 ? "Person" : "Persons"}
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          <div className="font-medium text-gray-900">
+                            {b.userId?.name || "Guest User"}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {b.userId?.email || "-"}
+                          <div className="text-xs text-gray-500">
+                            {b.userId?.email || "No email available"}
                           </div>
                         </td>
-                        <td className="px-4 py-3 capitalize">{b.status}</td>
-                        <td className="px-4 py-3 space-x-2">
-                          <button
-                            onClick={() => updateStatus(b._id, "confirmed")}
-                            className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                        <td className="px-4 py-4 text-sm">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${
+                              b.status === "confirmed"
+                                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                : b.status === "pending"
+                                ? "bg-amber-50 text-amber-800 border-amber-200"
+                                : "bg-rose-50 text-rose-800 border-rose-200"
+                            }`}
                           >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => updateStatus(b._id, "cancelled")}
-                            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                          >
-                            Cancel
-                          </button>
+                            {b.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-sm space-x-2">
+                          {b.status !== "confirmed" && (
+                            <button
+                              onClick={() => updateStatus(b._id, "confirmed")}
+                              className="px-3 py-1 text-xs font-medium bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition"
+                            >
+                              Confirm
+                            </button>
+                          )}
+                          {b.status !== "cancelled" && (
+                            <button
+                              onClick={() => updateStatus(b._id, "cancelled")}
+                              className="px-3 py-1 text-xs font-medium bg-rose-600 text-white rounded-md hover:bg-rose-700 transition"
+                            >
+                              Cancel
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                <div className="p-4 flex justify-end">
+                <div className="p-4 flex justify-between items-center bg-gray-50 border-t">
+                  <span className="text-xs text-gray-500">
+                    Showing {filteredBookings.length} of {bookings.length} total bookings
+                  </span>
                   <button
                     onClick={() => {
                       const header = [
@@ -486,7 +589,7 @@ export default function AdminDashboard() {
                         "Email",
                         "Status",
                       ];
-                      const rows = bookings.map((b) => [
+                      const rows = filteredBookings.map((b) => [
                         b.packageName,
                         new Date(b.date).toLocaleDateString(),
                         String(b.travelers),
@@ -507,11 +610,11 @@ export default function AdminDashboard() {
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement("a");
                       a.href = url;
-                      a.download = `bookings-${Date.now()}.csv`;
+                      a.download = `bookings-${bookingStatusFilter}-${Date.now()}.csv`;
                       a.click();
                       URL.revokeObjectURL(url);
                     }}
-                    className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900"
+                    className="px-4 py-2 text-xs font-medium bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition"
                   >
                     Export CSV
                   </button>
