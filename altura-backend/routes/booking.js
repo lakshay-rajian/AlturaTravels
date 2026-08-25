@@ -8,6 +8,110 @@ import nodemailer from "nodemailer";
 
 const router = express.Router();
 
+// Helper to create mail transporter with fallback diagnostics
+async function createMailTransporter() {
+  const smtpUser = process.env.EMAIL_USER || process.env.ADMIN_EMAIL;
+  const rawPass = process.env.EMAIL_PASS || "";
+  const smtpPass = rawPass.replace(/\s+/g, "");
+
+  if (smtpUser && smtpPass) {
+    return {
+      transporter: nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: { user: smtpUser, pass: smtpPass },
+        tls: { rejectUnauthorized: false },
+      }),
+      isReal: true,
+      sender: smtpUser,
+    };
+  } else {
+    console.warn("⚠️ EMAIL_PASS environment variable is missing or empty. Falling back to Ethereal test email account.");
+    const testAccount = await nodemailer.createTestAccount();
+    return {
+      transporter: nodemailer.createTransport({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false,
+        auth: { user: testAccount.user, pass: testAccount.pass },
+      }),
+      isReal: false,
+      sender: testAccount.user,
+    };
+  }
+}
+
+/**
+ * @route   GET /api/bookings/test-email
+ * @desc    Diagnostic test route to verify email sending configuration
+ * @access  Public
+ */
+router.get("/test-email", async (req, res) => {
+  try {
+    const smtpUser = process.env.EMAIL_USER || process.env.ADMIN_EMAIL;
+    const rawPass = process.env.EMAIL_PASS || "";
+    const smtpPass = rawPass.replace(/\s+/g, "");
+
+    const configStatus = {
+      ADMIN_EMAIL: process.env.ADMIN_EMAIL || "Not set",
+      EMAIL_USER: process.env.EMAIL_USER || "Not set",
+      EMAIL_PASS_CONFIGURED: Boolean(smtpPass),
+      EMAIL_PASS_LENGTH: smtpPass.length,
+      USING_REAL_SMTP: Boolean(smtpUser && smtpPass),
+    };
+
+    const targetEmail = req.query.to || process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+
+    if (!targetEmail) {
+      return res.status(400).json({
+        message: "No recipient email available to send test email.",
+        configStatus,
+      });
+    }
+
+    const { transporter, isReal, sender } = await createMailTransporter();
+
+    const info = await transporter.sendMail({
+      to: targetEmail,
+      from: `"Altura Travels Admin" <${sender}>`,
+      subject: "Test Email - Altura Travels System",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>Altura Travels Email System Diagnostic Test</h2>
+          <p>This is a test email sent from Altura Travels backend.</p>
+          <p><strong>SMTP Mode:</strong> ${isReal ? "Real Gmail SMTP" : "Ethereal Test SMTP"}</p>
+          <p><strong>Sender:</strong> ${sender}</p>
+          <p><strong>Recipient:</strong> ${targetEmail}</p>
+          <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+        </div>
+      `,
+    });
+
+    const previewUrl = !isReal ? nodemailer.getTestMessageUrl(info) : null;
+
+    res.json({
+      success: true,
+      message: isReal
+        ? `Test email sent successfully via Gmail to ${targetEmail}`
+        : `Test email generated via Ethereal fallback. View preview URL.`,
+      configStatus,
+      messageId: info.messageId,
+      previewUrl,
+    });
+  } catch (err) {
+    console.error("❌ Test email failed:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send test email",
+      error: err.message,
+      code: err.code,
+      command: err.command,
+      response: err.response,
+    });
+  }
+});
+
 /**
  * @route   POST /api/bookings
  * @desc    Create a new booking and send confirmation email
@@ -42,7 +146,7 @@ router.post("/", authMiddleware, async (req, res) => {
 
     await newBooking.save();
 
-    // Optional: link booking to user document (not required for functionality)
+    // Optional: link booking to user document
     try {
       user.bookings.push(newBooking._id);
       await user.save();
@@ -54,36 +158,13 @@ router.post("/", authMiddleware, async (req, res) => {
     // Send confirmation email asynchronously in the background
     (async () => {
       try {
-        let transporter;
-        const smtpUser = process.env.EMAIL_USER || process.env.ADMIN_EMAIL;
-        const smtpPass = process.env.EMAIL_PASS;
-        
-        if (smtpUser && smtpPass) {
-          // Use real credentials if provided
-          transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: { user: smtpUser, pass: smtpPass },
-          });
-        } else {
-          // Use Ethereal for testing if no credentials are set
-          console.warn("⚠️ EMAIL_PASS not set in environment. Falling back to Ethereal test email account.");
-          const testAccount = await nodemailer.createTestAccount();
-          transporter = nodemailer.createTransport({
-            host: "smtp.ethereal.email",
-            port: 587,
-            secure: false,
-            auth: { user: testAccount.user, pass: testAccount.pass },
-          });
-        }
-
-        const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
-        const fromSender = adminEmail
-          ? `Altura Travels Admin <${adminEmail}>`
-          : (process.env.EMAIL_USER || "no-reply@alturatravels.com");
+        const { transporter, isReal, sender } = await createMailTransporter();
+        const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER || sender;
+        const fromHeader = `"Altura Travels Admin" <${sender}>`;
 
         const mailOptions = {
           to: user.email,
-          from: fromSender,
+          from: fromHeader,
           subject: "Your Booking Confirmation - Altura Travels",
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
@@ -120,13 +201,13 @@ router.post("/", authMiddleware, async (req, res) => {
         }
 
         const info = await transporter.sendMail(mailOptions);
-        console.log(`Booking email sent successfully to ${user.email}. MessageId: ${info.messageId}`);
+        console.log(`✅ Booking confirmation email sent to ${user.email}. MessageId: ${info.messageId}`);
 
-        if (!smtpPass) {
-          console.log("Preview URL (Ethereal): %s", nodemailer.getTestMessageUrl(info));
+        if (!isReal) {
+          console.log("🔗 Ethereal Test Email Preview URL: %s", nodemailer.getTestMessageUrl(info));
         }
       } catch (emailErr) {
-        console.error("Email send failed:", emailErr.message);
+        console.error("❌ Email send failed:", emailErr);
       }
     })();
   } catch (err) {
