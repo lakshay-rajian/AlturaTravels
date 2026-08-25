@@ -168,7 +168,6 @@ router.get("/test-email", async (req, res) => {
         <div style="font-family: Arial, sans-serif; padding: 20px;">
           <h2>Altura Travels Email System Diagnostic Test</h2>
           <p>This is a test email sent from Altura Travels backend.</p>
-          <p><strong>Provider:</strong> ${result.provider}</p>
           <p><strong>Recipient:</strong> ${targetEmail}</p>
           <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
         </div>
