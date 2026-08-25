@@ -11,26 +11,56 @@ const router = express.Router();
 // Helper to dispatch email via HTTP APIs (Resend/Brevo) or Nodemailer SMTP
 async function dispatchEmail({ to, subject, html }) {
   const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER || "lakshayrajian@gmail.com";
+  const recipientEmail = to || adminEmail;
 
   // 1. Resend HTTP API (Port 443 - Never blocked on Render)
   if (process.env.RESEND_API_KEY) {
+    const payload = {
+      from: process.env.RESEND_FROM || "Altura Travels <onboarding@resend.dev>",
+      to: [recipientEmail],
+      reply_to: adminEmail,
+      subject,
+      html,
+    };
+    if (adminEmail && adminEmail.toLowerCase() !== recipientEmail.toLowerCase()) {
+      payload.bcc = [adminEmail];
+    }
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       },
-      body: JSON.stringify({
-        from: process.env.RESEND_FROM || "Altura Travels <onboarding@resend.dev>",
-        to: [to],
-        bcc: [adminEmail],
-        reply_to: adminEmail,
-        subject,
-        html,
-      }),
+      body: JSON.stringify(payload),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || JSON.stringify(data));
+    if (!res.ok) {
+      const errMsg = data.message || JSON.stringify(data);
+      // If Resend free tier testing mode restriction occurs ("you can only send to your own email address")
+      if (
+        errMsg.toLowerCase().includes("only send to your own email") ||
+        errMsg.toLowerCase().includes("testing mode") ||
+        errMsg.toLowerCase().includes("validation_error")
+      ) {
+        console.warn(`⚠️ Resend free domain restricted recipient (${recipientEmail}). Redirecting email to Admin (${adminEmail}).`);
+        delete payload.bcc;
+        payload.to = [adminEmail];
+        const resFallback = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          },
+          body: JSON.stringify(payload),
+        });
+        const dataFallback = await resFallback.json();
+        if (resFallback.ok) {
+          return { provider: "Resend HTTP API (Admin Fallback)", messageId: dataFallback.id };
+        }
+      }
+      throw new Error(errMsg);
+    }
     return { provider: "Resend HTTP API (Port 443)", messageId: data.id };
   }
 
@@ -44,7 +74,7 @@ async function dispatchEmail({ to, subject, html }) {
       },
       body: JSON.stringify({
         sender: { name: "Altura Travels Admin", email: process.env.BREVO_SENDER || adminEmail },
-        to: [{ email: to }],
+        to: [{ email: recipientEmail }],
         bcc: [{ email: adminEmail }],
         replyTo: { email: adminEmail },
         subject,
@@ -61,7 +91,7 @@ async function dispatchEmail({ to, subject, html }) {
   const fromHeader = `"Altura Travels Admin" <${sender}>`;
 
   const mailOptions = {
-    to,
+    to: recipientEmail,
     from: fromHeader,
     subject,
     html,
