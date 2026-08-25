@@ -15,14 +15,31 @@ async function createMailTransporter() {
   const smtpPass = rawPass.replace(/\s+/g, "");
 
   if (smtpUser && smtpPass) {
+    const host = process.env.SMTP_HOST;
+    const port = Number(process.env.SMTP_PORT) || 587;
+    const secure = process.env.SMTP_SECURE === "true";
+
+    const transportConfig = host
+      ? {
+          host,
+          port,
+          secure,
+          auth: { user: smtpUser, pass: smtpPass },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000,
+          tls: { rejectUnauthorized: false },
+        }
+      : {
+          service: "gmail",
+          auth: { user: smtpUser, pass: smtpPass },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000,
+        };
+
     return {
-      transporter: nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: { user: smtpUser, pass: smtpPass },
-        tls: { rejectUnauthorized: false },
-      }),
+      transporter: nodemailer.createTransport(transportConfig),
       isReal: true,
       sender: smtpUser,
     };
@@ -35,6 +52,7 @@ async function createMailTransporter() {
         port: 587,
         secure: false,
         auth: { user: testAccount.user, pass: testAccount.pass },
+        connectionTimeout: 10000,
       }),
       isReal: false,
       sender: testAccount.user,
