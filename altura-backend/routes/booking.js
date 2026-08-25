@@ -74,9 +74,14 @@ router.post("/", authMiddleware, async (req, res) => {
           console.log("Using Ethereal for testing booking email...");
         }
 
-        const info = await transporter.sendMail({
+        const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+        const fromSender = adminEmail
+          ? `Altura Travels Admin <${adminEmail}>`
+          : (process.env.EMAIL_USER || "no-reply@alturatravels.com");
+
+        const mailOptions = {
           to: user.email,
-          from: process.env.EMAIL_USER || "no-reply@alturatravels.com",
+          from: fromSender,
           subject: "Your Booking Confirmation - Altura Travels",
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
@@ -105,7 +110,14 @@ router.post("/", authMiddleware, async (req, res) => {
               </div>
             </div>
           `,
-        });
+        };
+
+        if (adminEmail) {
+          mailOptions.replyTo = adminEmail;
+          mailOptions.bcc = adminEmail;
+        }
+
+        const info = await transporter.sendMail(mailOptions);
 
         if (!process.env.EMAIL_USER) {
           console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));

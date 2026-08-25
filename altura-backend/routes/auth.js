@@ -40,14 +40,11 @@ router.put("/profile", authMiddleware, async (req, res) => {
 
 // helper: parse allowed admin emails
 function getAllowedAdminEmails() {
-  const raw = process.env.ADMIN_EMAILS || "";
+  const raw = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || "";
   const fromEnv = raw
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
-  // Ensure this allowlisted admin email always has access
-  const hardcoded = "lakshayrajian@gmail.com";
-  if (!fromEnv.includes(hardcoded)) fromEnv.push(hardcoded);
   return fromEnv;
 }
 
