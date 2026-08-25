@@ -8,6 +8,78 @@ import nodemailer from "nodemailer";
 
 const router = express.Router();
 
+// Helper to dispatch email via HTTP APIs (Resend/Brevo) or Nodemailer SMTP
+async function dispatchEmail({ to, subject, html }) {
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER || "lakshayrajian@gmail.com";
+
+  // 1. Resend HTTP API (Port 443 - Never blocked on Render)
+  if (process.env.RESEND_API_KEY) {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: process.env.RESEND_FROM || "Altura Travels <onboarding@resend.dev>",
+        to: [to],
+        bcc: [adminEmail],
+        reply_to: adminEmail,
+        subject,
+        html,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || JSON.stringify(data));
+    return { provider: "Resend HTTP API (Port 443)", messageId: data.id };
+  }
+
+  // 2. Brevo HTTP API (Port 443 - Never blocked on Render)
+  if (process.env.BREVO_API_KEY) {
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
+      },
+      body: JSON.stringify({
+        sender: { name: "Altura Travels Admin", email: process.env.BREVO_SENDER || adminEmail },
+        to: [{ email: to }],
+        bcc: [{ email: adminEmail }],
+        replyTo: { email: adminEmail },
+        subject,
+        htmlContent: html,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || JSON.stringify(data));
+    return { provider: "Brevo HTTP API (Port 443)", messageId: data.messageId };
+  }
+
+  // 3. Nodemailer SMTP (Gmail / Custom SMTP)
+  const { transporter, isReal, sender } = await createMailTransporter();
+  const fromHeader = `"Altura Travels Admin" <${sender}>`;
+
+  const mailOptions = {
+    to,
+    from: fromHeader,
+    subject,
+    html,
+  };
+
+  if (adminEmail) {
+    mailOptions.replyTo = adminEmail;
+    mailOptions.bcc = adminEmail;
+  }
+
+  const info = await transporter.sendMail(mailOptions);
+  return {
+    provider: isReal ? "Gmail SMTP" : "Ethereal Test SMTP",
+    messageId: info.messageId,
+    previewUrl: !isReal ? nodemailer.getTestMessageUrl(info) : null,
+  };
+}
+
 // Helper to create mail transporter with fallback diagnostics
 async function createMailTransporter() {
   const smtpUser = process.env.EMAIL_USER || process.env.ADMIN_EMAIL;
@@ -25,17 +97,17 @@ async function createMailTransporter() {
           port,
           secure,
           auth: { user: smtpUser, pass: smtpPass },
-          connectionTimeout: 10000,
-          greetingTimeout: 10000,
-          socketTimeout: 15000,
+          connectionTimeout: 8000,
+          greetingTimeout: 8000,
+          socketTimeout: 10000,
           tls: { rejectUnauthorized: false },
         }
       : {
           service: "gmail",
           auth: { user: smtpUser, pass: smtpPass },
-          connectionTimeout: 10000,
-          greetingTimeout: 10000,
-          socketTimeout: 15000,
+          connectionTimeout: 8000,
+          greetingTimeout: 8000,
+          socketTimeout: 10000,
         };
 
     return {
@@ -52,7 +124,7 @@ async function createMailTransporter() {
         port: 587,
         secure: false,
         auth: { user: testAccount.user, pass: testAccount.pass },
-        connectionTimeout: 10000,
+        connectionTimeout: 8000,
       }),
       isReal: false,
       sender: testAccount.user,
@@ -75,8 +147,9 @@ router.get("/test-email", async (req, res) => {
       ADMIN_EMAIL: process.env.ADMIN_EMAIL || "Not set",
       EMAIL_USER: process.env.EMAIL_USER || "Not set",
       EMAIL_PASS_CONFIGURED: Boolean(smtpPass),
-      EMAIL_PASS_LENGTH: smtpPass.length,
-      USING_REAL_SMTP: Boolean(smtpUser && smtpPass),
+      RESEND_API_KEY_CONFIGURED: Boolean(process.env.RESEND_API_KEY),
+      BREVO_API_KEY_CONFIGURED: Boolean(process.env.BREVO_API_KEY),
+      RECOMMENDED_FOR_RENDER: Boolean(process.env.RESEND_API_KEY || process.env.BREVO_API_KEY),
     };
 
     const targetEmail = req.query.to || process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
@@ -88,34 +161,25 @@ router.get("/test-email", async (req, res) => {
       });
     }
 
-    const { transporter, isReal, sender } = await createMailTransporter();
-
-    const info = await transporter.sendMail({
+    const result = await dispatchEmail({
       to: targetEmail,
-      from: `"Altura Travels Admin" <${sender}>`,
       subject: "Test Email - Altura Travels System",
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
           <h2>Altura Travels Email System Diagnostic Test</h2>
           <p>This is a test email sent from Altura Travels backend.</p>
-          <p><strong>SMTP Mode:</strong> ${isReal ? "Real Gmail SMTP" : "Ethereal Test SMTP"}</p>
-          <p><strong>Sender:</strong> ${sender}</p>
+          <p><strong>Provider:</strong> ${result.provider}</p>
           <p><strong>Recipient:</strong> ${targetEmail}</p>
           <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
         </div>
       `,
     });
 
-    const previewUrl = !isReal ? nodemailer.getTestMessageUrl(info) : null;
-
     res.json({
       success: true,
-      message: isReal
-        ? `Test email sent successfully via Gmail to ${targetEmail}`
-        : `Test email generated via Ethereal fallback. View preview URL.`,
+      message: `Test email dispatched via ${result.provider}`,
       configStatus,
-      messageId: info.messageId,
-      previewUrl,
+      result,
     });
   } catch (err) {
     console.error("❌ Test email failed:", err);
@@ -125,7 +189,7 @@ router.get("/test-email", async (req, res) => {
       error: err.message,
       code: err.code,
       command: err.command,
-      response: err.response,
+      renderNote: "Render free tier blocks SMTP ports (25/465/587). Add RESEND_API_KEY or BREVO_API_KEY in Render to use HTTP Port 443.",
     });
   }
 });
@@ -176,13 +240,8 @@ router.post("/", authMiddleware, async (req, res) => {
     // Send confirmation email asynchronously in the background
     (async () => {
       try {
-        const { transporter, isReal, sender } = await createMailTransporter();
-        const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER || sender;
-        const fromHeader = `"Altura Travels Admin" <${sender}>`;
-
-        const mailOptions = {
+        const result = await dispatchEmail({
           to: user.email,
-          from: fromHeader,
           subject: "Your Booking Confirmation - Altura Travels",
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
@@ -211,21 +270,10 @@ router.post("/", authMiddleware, async (req, res) => {
               </div>
             </div>
           `,
-        };
-
-        if (adminEmail) {
-          mailOptions.replyTo = adminEmail;
-          mailOptions.bcc = adminEmail;
-        }
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ Booking confirmation email sent to ${user.email}. MessageId: ${info.messageId}`);
-
-        if (!isReal) {
-          console.log("🔗 Ethereal Test Email Preview URL: %s", nodemailer.getTestMessageUrl(info));
-        }
+        });
+        console.log(`✅ Booking confirmation email sent via ${result.provider} to ${user.email}`);
       } catch (emailErr) {
-        console.error("❌ Email send failed:", emailErr);
+        console.error("❌ Email send failed:", emailErr.message || emailErr);
       }
     })();
   } catch (err) {
