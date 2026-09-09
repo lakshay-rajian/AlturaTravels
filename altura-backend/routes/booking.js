@@ -13,7 +13,29 @@ async function dispatchEmail({ to, subject, html }) {
   const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER || "lakshayrajian@gmail.com";
   const recipientEmail = to || adminEmail;
 
-  // 1. Resend HTTP API (Port 443 - Never blocked on Render)
+  // 1. Brevo HTTP API (Port 443 - No recipient restrictions, 300 free emails/day)
+  if (process.env.BREVO_API_KEY) {
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
+      },
+      body: JSON.stringify({
+        sender: { name: "Altura Travels Admin", email: process.env.BREVO_SENDER || adminEmail },
+        to: [{ email: recipientEmail }],
+        bcc: [{ email: adminEmail }],
+        replyTo: { email: adminEmail },
+        subject,
+        htmlContent: html,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || JSON.stringify(data));
+    return { provider: "Brevo HTTP API (Port 443)", messageId: data.messageId };
+  }
+
+  // 2. Resend HTTP API (Port 443 - Free tier restricted to owner's email only)
   if (process.env.RESEND_API_KEY) {
     const payload = {
       from: process.env.RESEND_FROM || "Altura Travels <onboarding@resend.dev>",
@@ -64,28 +86,6 @@ async function dispatchEmail({ to, subject, html }) {
     return { provider: "Resend HTTP API (Port 443)", messageId: data.id };
   }
 
-  // 2. Brevo HTTP API (Port 443 - Never blocked on Render)
-  if (process.env.BREVO_API_KEY) {
-    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": process.env.BREVO_API_KEY,
-      },
-      body: JSON.stringify({
-        sender: { name: "Altura Travels Admin", email: process.env.BREVO_SENDER || adminEmail },
-        to: [{ email: recipientEmail }],
-        bcc: [{ email: adminEmail }],
-        replyTo: { email: adminEmail },
-        subject,
-        htmlContent: html,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || JSON.stringify(data));
-    return { provider: "Brevo HTTP API (Port 443)", messageId: data.messageId };
-  }
-
   // 3. Nodemailer SMTP (Gmail / Custom SMTP)
   const { transporter, isReal, sender } = await createMailTransporter();
   const fromHeader = `"Altura Travels Admin" <${sender}>`;
@@ -109,6 +109,7 @@ async function dispatchEmail({ to, subject, html }) {
     previewUrl: !isReal ? nodemailer.getTestMessageUrl(info) : null,
   };
 }
+
 
 // Helper to create mail transporter with fallback diagnostics
 async function createMailTransporter() {
